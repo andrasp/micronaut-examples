@@ -15,11 +15,14 @@
  */
 package example;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.validation.Validated;
 import io.reactivex.Single;
+import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
@@ -29,10 +32,17 @@ import javax.validation.constraints.NotBlank;
  */
 @Controller("/")
 @Validated
+@RequiredArgsConstructor
 public class HelloController {
 
-    @Get(uri = "/hello/{name}", produces = MediaType.TEXT_PLAIN)
-    public Single<String> hello(@NotBlank String name) {
-        return Single.just("Hello " + name + "!");
+    private final ObjectMapper jsonMapper;
+
+    @Get(uri = "/hello/{greetingWord}/{name}", produces = MediaType.TEXT_PLAIN)
+    public Single<String> hello(@NotBlank final String greetingWord, @NotBlank final String name) throws JsonProcessingException {
+        final Greeting greeting = Greeting.builder()
+                                          .greetingWord(greetingWord)
+                                          .name(name)
+                                          .build();
+        return Single.just(jsonMapper.writeValueAsString(greeting));
     }
 }
