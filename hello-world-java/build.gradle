@@ -2,6 +2,7 @@ plugins {
     id "net.ltgt.apt-eclipse" version "0.21"
     id "com.github.johnrengelman.shadow" version "5.0.0"
     id "application"
+    id "org.openapi.generator" version "4.2.3"
 }
 
 version "0.1"
@@ -57,3 +58,25 @@ shadowJar {
 
 run.classpath += configurations.developmentOnly
 run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1', '-Dcom.sun.management.jmxremote')
+
+def projNameNoDashes = "${project.name.replace('-', '')}"
+def artifactId = "${project.name}-client"
+def artifactGroupId = "${project.group}"
+def artifactVersion = "${project.version}"
+
+openApiGenerate {
+    generatorName = "java"
+    inputSpec = "$buildDir/classes/java/main/META-INF/swagger/the-title-0.0.yml".toString()
+    outputDir = "$buildDir/generated/open-api-client".toString()
+    id = artifactId.toString()
+    groupId = artifactGroupId.toString()
+    version = artifactVersion.toString()
+    apiPackage = "${artifactGroupId}.client.${projNameNoDashes}.api".toString()
+    invokerPackage = "${artifactGroupId}.client.${projNameNoDashes}.invoker".toString()
+    modelPackage = "${artifactGroupId}.client.${projNameNoDashes}.model".toString()
+    validateSpec = false
+    skipValidateSpec = true
+    configOptions = [
+        dateLibrary: "java8"
+    ]
+}
